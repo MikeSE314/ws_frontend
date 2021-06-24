@@ -1,19 +1,25 @@
 import Vuex from 'vuex'
 import Vue from 'vue'
-import { debounce, isEqual } from "lodash";
+import { debounce, isEqual } from "lodash"
+import { v4 as uuidv4 } from 'uuid'
 
 Vue.use(Vuex)
-
-
 
 export default new Vuex.Store({
   state: () => {
     return {
       websocket: null,
       websocket_host: 'ws://localhost:3000',
+      uuid: uuidv4(),
       followed: {
         message: 'sup',
         num_clicks: 0,
+        cards: [
+          { id: 12, img_src: 'https://www.ibrahima-ndaw.com/static/7edf5aa0b6be704f1c421111fc8a0523/31987/cover-3.png', title: 'good card', desc: 'This is a good card' },
+          { id: 13, img_src: '', title: 'good card', desc: 'This is a good card' },
+          { id: 14, img_src: 'https://www.ibrahima-ndaw.com/static/7edf5aa0b6be704f1c421111fc8a0523/31987/cover-3.png', title: '', desc: 'This is a good card' },
+          { id: 15, img_src: 'https://www.ibrahima-ndaw.com/static/7edf5aa0b6be704f1c421111fc8a0523/31987/cover-3.png', title: 'good card', desc: '' },
+        ]
       }
     }
   },
@@ -31,40 +37,41 @@ export default new Vuex.Store({
     //   state.followed.message = message
     // },
     UPDATE_STATE_FROM_WEBSOCKET (state, new_followed_state) {
-      // console.log("We did it! We're getting the state from someone else!")
-      state.followed = new_followed_state
+      if (!isEqual(new_followed_state, state.followed)) {
+        state.followed = new_followed_state
+      }
     },
     UPDATE_FOLLOWED (state, new_followed_state) {
       state.followed = { ...state.followed, ...new_followed_state }
-    }
+    },
   },
   actions: {
     creation ({ commit, dispatch, state }, payload) {
-      // this.subscribe((mutation) => {
-      //   if (mutation.type === 'ONMESSAGE') {
-      //     console.log(mutation.payload)
-      //     console.log('subscription')
-      //   }
-      // })
       commit('SET_UP_WEBSOCKET')
       commit('SET_UP_WEBSOCKET_ONMESSAGE', (data) => dispatch('onmessage', data))
       commit('SET_UP_WEBSOCKET_ONOPEN', () => dispatch('onopen'))
     },
-    // send_message ({ state }, message) {
-    //   state.websocket.send(message)
-    // },
     send_followed_state ({ state }) {
-      state.websocket.send(JSON.stringify(state.followed))
+      state.websocket.send(JSON.stringify({ payload: state.followed, action: 'ws_receive_followed_state' }))
     },
-    onmessage ({ state, commit }, data) {
+    onmessage ({ dispatch }, data) {
       // if (JSON.stringify(state.followed) !== data.data) {
       let new_data = JSON.parse(data.data)
-      if (!isEqual(new_data, state.followed)) {
-        commit('UPDATE_STATE_FROM_WEBSOCKET', new_data)
+      if (!new_data.action.startsWith('ws_')) throw Error('No good!')
+      dispatch(new_data.action, new_data.payload)
+    },
+    ws_receive_followed_state ({ state, commit }, new_state) {
+      commit('UPDATE_STATE_FROM_WEBSOCKET', new_state)
+    },
+    ws_request ({ state, dispatch }, uuid) {
+      if (uuid !== state.uuid) {
+        dispatch('debounce_send_followed_state')
       }
     },
     onopen ({ state, commit }) {
-      // anything on open?
+      // When we first open the websocket, we need to see if anyone
+      // else has state already to show us.
+      state.websocket.send(JSON.stringify({ action: 'ws_request', payload: state.uuid }))
     },
     update_followed ({dispatch, commit}, new_followed) {
       commit('UPDATE_FOLLOWED', new_followed)

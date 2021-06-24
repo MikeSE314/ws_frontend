@@ -31,6 +31,8 @@
 :root {
   --primary: #33C3F0;
   --primary-dark: #1EAEDB;
+  --danger: #ff1744;
+  --danger-dark: #c4001d;
 }
 
 /* Grid
@@ -228,6 +230,31 @@ input[type="button"].button-primary:focus {
   color: #FFF;
   background-color: var(--primary-dark);
   border-color: var(--primary-dark); }
+
+
+/* Danger buttons
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.button.button-primary.danger,
+button.button-primary.danger,
+input[type="submit"].button-primary.danger,
+input[type="reset"].button-primary.danger,
+input[type="button"].button-primary.danger {
+  color: #FFF;
+  background-color: var(--danger);
+  border-color: var(--danger); }
+.button.button-primary.danger:hover,
+button.button-primary.danger:hover,
+input[type="submit"].button-primary.danger:hover,
+input[type="reset"].button-primary.danger:hover,
+input[type="button"].button-primary.danger:hover,
+.button.button-primary.danger:focus,
+button.button-primary.danger:focus,
+input[type="submit"].button-primary.danger:focus,
+input[type="reset"].button-primary.danger:focus,
+input[type="button"].button-primary.danger:focus {
+  color: #FFF;
+  background-color: var(--danger-dark);
+  border-color: var(--danger-dark); }
 
 
 /* Forms
