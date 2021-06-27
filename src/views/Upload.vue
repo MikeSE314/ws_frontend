@@ -17,24 +17,17 @@ export default {
   },
   computed: {
     ...mapState([
+      'env'
     ]),
   },
   methods: {
     ...mapActions([
     ]),
     submit: function(event) {
-      fetch('http://localhost:3000/Upload', {
+      fetch(this.env.UPLOAD_HOST, {
         method: 'post',
         mode: 'cors',
-        // headers: {
-        //   'Content-Type': 'application/json',
-        //   'Access-Control-Allow-Origin': 'http://localhost:3000'
-        //   // 'Content-Type': 'application/x-www-form-urlencoded',
-        // },
         body: JSON.stringify({ test: event.target.test.value })
-      // }).then(response => {
-      //   console.log(response)
-      // })
       }).then(response => response.text()).then(text => {
         console.log(text)
       })

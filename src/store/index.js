@@ -1,15 +1,16 @@
-import Vuex from 'vuex'
-import Vue from 'vue'
 import { debounce, isEqual } from "lodash"
 import { v4 as uuidv4 } from 'uuid'
+import Env from "../environment/env.json"
+import Vue from 'vue'
+import Vuex from 'vuex'
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: () => {
     return {
+      env: Env,
       websocket: null,
-      websocket_host: 'ws://localhost:3000',
       uuid: uuidv4(),
       followed: {
         message: 'sup',
@@ -25,7 +26,7 @@ export default new Vuex.Store({
   },
   mutations: {
     SET_UP_WEBSOCKET (state) {
-      state.websocket = new WebSocket('ws://localhost:3000')
+      state.websocket = new WebSocket(state.env.WEBSOCKET_HOST)
     },
     SET_UP_WEBSOCKET_ONMESSAGE (state, callback) {
       state.websocket.onmessage = callback
@@ -33,9 +34,6 @@ export default new Vuex.Store({
     SET_UP_WEBSOCKET_ONOPEN (state, callback) {
       state.websocket.onopen = callback
     },
-    // ONMESSAGE (state, message) {
-    //   state.followed.message = message
-    // },
     UPDATE_STATE_FROM_WEBSOCKET (state, new_followed_state) {
       if (!isEqual(new_followed_state, state.followed)) {
         state.followed = new_followed_state
